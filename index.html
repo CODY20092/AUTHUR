@@ -225,7 +225,7 @@
         <div class="bg-gradient-to-r from-purple-900 to-slate-900 border border-purple-500/40 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold">ADMIN CONTROL PANEL</span>
-                <h2 class="text-2xl font-bold text-white mt-2">ระบบจัดการหลังบ้านแอดมิน (Real-time Cloud Sync)</h2>
+                <h2 class="text-2xl font-bold text-white mt-2">ระบบจัดการหลังบ้านแอดมิน (Firebase Real-time Sync)</h2>
             </div>
             <button onclick="switchMainView('client')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700">
                 <i class="fa-solid fa-arrow-left mr-1"></i> กลับหน้าเว็บหลัก
@@ -315,7 +315,7 @@
 
         <!-- ADMIN TAB 3: USERS & ADMIN TOPUP/DEDUCT/DELETE -->
         <div id="admin-sec-users" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
-            <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">จัดการรายชื่อสมาชิก & เติม/หักเครดิต/ลบสมาชิก (Real-time Cloud)</h3>
+            <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">จัดการรายชื่อสมาชิก & เติม/หักเครดิต/ลบสมาชิก (Firebase Real-time)</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-slate-400">
                     <thead class="bg-slate-800 text-slate-300 text-xs">
@@ -444,11 +444,28 @@
     <!-- YouTube IFrame API Script -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
-    <!-- JS SCRIPT LOGIC (JSONBin Connected & Fixed YouTube Audio) -->
-    <script>
-        // กำหนดค่า JSONBin.io ของคุณที่นี่
-        const BIN_ID = '6aef1034ac6210605a750c45';
-        const MASTER_KEY = '$2a$10$TxRVZoOCPFYpFNmzo8rsBeWAl3pRFSGfPho0AypwHRcRwa.DL.1ou';
+    <!-- Firebase SDK (Modular v10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // ==========================================================
+        // ⚙️ ตั้งค่า Firebase Config ของคุณตรงนี้ (สร้างฟรีที่ Firebase Console)
+        // ==========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBz3JiHXay4PMmDrGqMPzlyG60p7JRlJJU",
+            authDomain: "arthur-f415e.firebaseapp.com",
+            projectId: "arthur-f415e",
+            storageBucket: "arthur-f415e.firebasestorage.app",
+            messagingSenderId: "681898124925",
+            appId: ""1:681898124925:web:3944f05bbb7ccaf0257314
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.db = db;
+        window.docRef = doc(db, "gamedata", "mainconfig");
 
         let users = [];
         let gachaItems = [];
@@ -463,37 +480,31 @@
         let isPlaying = false;
         let ytPlayer = null;
 
-        // ฟังก์ชันดึงข้อมูลทั้งหมดจาก JSONBin กลาง
-        async function fetchCloudData(isSilent = false) {
+        // ฟังก์ชันบันทึกข้อมูลขึ้น Firebase Cloud
+        window.saveCloudData = async function() {
             try {
-                let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': MASTER_KEY }
+                await setDoc(window.docRef, {
+                    users,
+                    gachaItems,
+                    gachaPrice,
+                    playlist,
+                    webSettings
                 });
-                let json = await res.json();
-                let record = json.record || {};
+            } catch(err) {
+                console.error("Firebase save error:", err);
+            }
+        };
 
-                users = record.users || [{ username: 'admin', pass: '1234', role: 'ADMIN', credit: 9999, answer: 'admin' }];
-                gachaItems = record.gachaItems || [
-                    { id: 1, label: 'โบนัส 10 P', points: 10, rate: 40, color: '#3b82f6' },
-                    { id: 2, label: 'สกิน EVO UR', points: 500, rate: 5, color: '#eab308' },
-                    { id: 3, label: 'เกลือ (0 P)', points: 0, rate: 30, color: '#64748b' },
-                    { id: 4, label: 'โบนัส 100 P', points: 100, rate: 15, color: '#10b981' },
-                    { id: 5, label: 'โค้ดเพชร FF', points: 250, rate: 10, color: '#ec4899' }
-                ];
-                gachaPrice = record.gachaPrice || 50;
-                playlist = record.playlist || [
-                    { id: 1, title: 'EDM Cyberpunk Beats', url: 'https://youtu.be/36YnV9STBqc' },
-                    { id: 2, title: 'Gaming Lounge Music', url: 'https://youtu.be/5qap5aO4i9A' }
-                ];
-                webSettings = record.webSettings || {
-                    name: 'IJERDID PLATFORM',
-                    tagline: 'GACHA & CASINO PLATFORM',
-                    announcement: 'ยินดีต้อนรับสู่ระบบเว็บสุ่มรางวัลและคาสิโนบาคาร่าออนไลน์ สมัครสมาชิกรับเครดิตฟรีเริ่มต้น!',
-                    bannerImg: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000&auto=format&fit=crop&q=80',
-                    bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
-                };
+        // ใช้ Realtime Listener (onSnapshot) ซิงค์ข้อมูลอัตโนมัติทันทีแบบเรียลไทม์จากทุกเครื่อง
+        onSnapshot(window.docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                let data = docSnap.data();
+                users = data.users || [];
+                gachaItems = data.gachaItems || [];
+                gachaPrice = data.gachaPrice || 50;
+                playlist = data.playlist || [];
+                webSettings = data.webSettings || {};
 
-                // อัปเดตหน้าจอ
                 applyWebSettings();
                 syncCurrentUserState();
                 updateNavbarAuth();
@@ -502,41 +513,14 @@
                 renderAdminMusicList();
                 document.getElementById('gacha-cost-display').innerText = gachaPrice;
                 document.getElementById('btn-gacha-price').innerText = gachaPrice;
-                if(!isSilent) drawWheel();
-            } catch(err) {
-                console.error("Cloud fetch error:", err);
+                drawWheel();
+            } else {
+                // ถ้ายังไม่มีข้อมูลใน Firestore ให้สร้างค่าเริ่มต้น
+                saveCloudData();
             }
-        }
+        });
 
-        // ฟังก์ชันบันทึกข้อมูลทั้งหมดขึ้น JSONBin กลาง
-        async function saveCloudData() {
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
-                    },
-                    body: JSON.stringify({
-                        users,
-                        gachaItems,
-                        gachaPrice,
-                        playlist,
-                        webSettings
-                    })
-                });
-            } catch(err) {
-                console.error("Cloud save error:", err);
-            }
-        }
-
-        window.onload = async function() {
-            await fetchCloudData();
-            // ทำการดึงข้อมูลซิงค์อัตโนมัติทุกๆ 4 วินาที (เพื่อให้เครื่องแอดมินเห็นสมาชิกใหม่แบบ Real-time)
-            setInterval(() => fetchCloudData(true), 4000);
-        };
-
-        function applyWebSettings() {
+        window.applyWebSettings = function() {
             document.getElementById('brand-name').innerText = webSettings.name || 'IJERDID PLATFORM';
             document.getElementById('brand-tagline').innerText = webSettings.tagline || 'GACHA & CASINO';
             document.getElementById('client-announcement').innerText = webSettings.announcement || '';
@@ -549,9 +533,9 @@
                 document.getElementById('setting-announcement').value = webSettings.announcement || '';
                 document.getElementById('setting-banner-img').value = webSettings.bannerImg || '';
             }
-        }
+        };
 
-        function syncCurrentUserState() {
+        window.syncCurrentUserState = function() {
             if(!currentUser) return;
             let found = users.find(x => x.username === currentUser.username);
             if(found) {
@@ -561,10 +545,66 @@
                 logout();
                 showToast('บัญชีของคุณถูกลบออกจากระบบโดยผู้ดูแลระบบ', 'warning');
             }
-        }
+        };
 
-        // YOUTUBE API PLAYER SETUP (ปรับปรุงเล่นเสียงได้จริง 100%)
-        function onYouTubeIframeAPIReady() {
+        // ฟังก์ชันสมัครสมาชิกใหม่
+        window.handleRegister = async function(e) {
+            e.preventDefault();
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value.trim();
+            const ans = document.getElementById('reg-answer').value.trim();
+
+            if (users.some(x => x.username === u)) {
+                return showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
+            }
+
+            users.push({ username: u, pass: p, role: 'USER', credit: 500, answer: ans });
+            await saveCloudData();
+
+            currentUser = { username: u, role: 'USER', credit: 500 };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateNavbarAuth();
+            closeAuthModal();
+            renderAdminUsersList();
+            showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
+        };
+
+        // ฟังก์ชันเข้าสู่ระบบ
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
+            let found = users.find(x => x.username === u && x.pass === p);
+            if (found) {
+                currentUser = { username: found.username, role: found.role, credit: found.credit };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateNavbarAuth();
+                closeAuthModal();
+                showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
+            } else {
+                showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
+            }
+        };
+
+        // ฟังก์ชันลืมรหัสผ่าน
+        window.handleForgot = async function(e) {
+            e.preventDefault();
+            const u = document.getElementById('forgot-user').value.trim();
+            const ans = document.getElementById('forgot-answer').value.trim();
+            const newP = document.getElementById('forgot-newpass').value.trim();
+            let user = users.find(x => x.username === u);
+            if (!user) return showToast('ไม่พบ Username นี้', 'warning');
+            if (user.answer !== ans) return showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
+
+            user.pass = newP;
+            await saveCloudData();
+            switchAuthView('login');
+            renderAdminUsersList();
+            showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
+        };
+
+        // YOUTUBE API PLAYER SETUP
+        window.onYouTubeIframeAPIReady = function() {
             if(!playlist || playlist.length === 0) return;
             let ytId = extractYouTubeId(playlist[0].url);
             document.getElementById('current-song-title').innerText = playlist[0].title;
@@ -573,39 +613,27 @@
                 height: '0',
                 width: '0',
                 videoId: ytId,
-                playerVars: { 
-                    'autoplay': 0, 
-                    'controls': 0,
-                    'enablejsapi': 1,
-                    'origin': window.location.origin 
-                },
+                playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1, 'origin': window.location.origin },
                 events: {
-                    'onReady': (event) => {
-                        console.log("YouTube Audio Player Loaded Ready");
-                    },
-                    'onStateChange': onPlayerStateChange,
-                    'onError': (err) => {
-                        console.error("YouTube Player Error:", err);
-                        showToast('เพลงนี้ถูกจำกัดสิทธิ์การเล่นในเว็บภายนอก', 'warning');
-                    }
+                    'onStateChange': onPlayerStateChange
                 }
             });
-        }
+        };
 
-        function extractYouTubeId(url) {
+        window.extractYouTubeId = function(url) {
             if (!url) return '36YnV9STBqc';
             let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             let match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : url;
-        }
+        };
 
-        function onPlayerStateChange(event) {
+        window.onPlayerStateChange = function(event) {
             if (event.data === YT.PlayerState.ENDED) {
                 nextSong();
             }
-        }
+        };
 
-        function toggleMusicPlay() {
+        window.toggleMusicPlay = function() {
             if(!playlist || playlist.length === 0) return showToast('ยังไม่มีเพลงในระบบ', 'warning');
             if(!ytPlayer || typeof ytPlayer.playVideo !== 'function') return showToast('เครื่องเล่นเพลงกำลังโหลด กรุณาลองใหม่อีกครั้ง', 'warning');
 
@@ -626,21 +654,21 @@
                 document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-pause text-lg"></i>';
                 document.getElementById('music-disc-icon').classList.add('animate-spin');
             }
-        }
+        };
 
-        function prevSong() {
+        window.prevSong = function() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
             playCurrentSongIndex();
-        }
+        };
 
-        function nextSong() {
+        window.nextSong = function() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex + 1) % playlist.length;
             playCurrentSongIndex();
-        }
+        };
 
-        function playCurrentSongIndex() {
+        window.playCurrentSongIndex = function() {
             let song = playlist[currentSongIndex];
             document.getElementById('current-song-title').innerText = song.title;
             if(ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
@@ -651,9 +679,9 @@
                     ytPlayer.playVideo();
                 }
             }
-        }
+        };
 
-        function updateNavbarAuth() {
+        window.updateNavbarAuth = function() {
             const authSec = document.getElementById('nav-auth-section');
             const adminBtn = document.getElementById('btn-view-admin');
             
@@ -681,26 +709,26 @@
                     <button onclick="openAuthModal('register')" class="hidden sm:block px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700 transition">สมัครสมาชิก</button>
                 `;
             }
-        }
+        };
 
-        function logout() {
+        window.logout = function() {
             currentUser = null;
             localStorage.removeItem('currentUser');
             updateNavbarAuth();
             switchMainView('client');
             showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
-        }
+        };
 
-        function switchMainView(view) {
+        window.switchMainView = function(view) {
             if (view === 'admin' && (!currentUser || currentUser.role !== 'ADMIN')) {
                 return showToast('เฉพาะบัญชีแอดมินเท่านั้น!', 'warning');
             }
             document.getElementById('view-client').classList.toggle('hidden', view !== 'client');
             document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
             if (view === 'client') switchClientTab('gacha');
-        }
+        };
 
-        function switchClientTab(tab) {
+        window.switchClientTab = function(tab) {
             ['gacha', 'baccarat'].forEach(t => {
                 document.getElementById(`client-sec-${t}`).classList.add('hidden');
                 document.getElementById(`client-tab-${t}`).className = "px-5 py-2.5 rounded-xl font-bold text-sm text-slate-400 hover:text-white transition whitespace-nowrap";
@@ -708,86 +736,32 @@
             document.getElementById(`client-sec-${tab}`).classList.remove('hidden');
             document.getElementById(`client-tab-${tab}`).className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-cyan-500 text-slate-950 transition whitespace-nowrap";
             if (tab === 'gacha') setTimeout(drawWheel, 50);
-        }
+        };
 
-        function switchAdminTab(tab) {
+        window.switchAdminTab = function(tab) {
             ['builder', 'gacha', 'users', 'music'].forEach(t => {
                 document.getElementById(`admin-sec-${t}`).classList.add('hidden');
                 document.getElementById(`admin-tab-${t}`).className = "px-4 py-2 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition whitespace-nowrap";
             });
             document.getElementById(`admin-sec-${tab}`).classList.remove('hidden');
             document.getElementById(`admin-tab-${tab}`).className = "px-4 py-2 rounded-xl font-bold text-xs bg-purple-600 text-white transition whitespace-nowrap";
-        }
+        };
 
-        // AUTH MODALS
-        function openAuthModal(mode) {
+        window.openAuthModal = function(mode) {
             document.getElementById('auth-modal').classList.remove('hidden');
             switchAuthView(mode);
-        }
-        function closeAuthModal() {
+        };
+        window.closeAuthModal = function() {
             document.getElementById('auth-modal').classList.add('hidden');
-        }
-        function switchAuthView(mode) {
+        };
+        window.switchAuthView = function(mode) {
             ['login', 'register', 'forgot'].forEach(m => {
                 document.getElementById(`form-${m}`).classList.toggle('hidden', m !== mode);
             });
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            await fetchCloudData(true);
-            const u = document.getElementById('login-user').value.trim();
-            const p = document.getElementById('login-pass').value.trim();
-            let found = users.find(x => x.username === u && x.pass === p);
-            if (found) {
-                currentUser = { username: found.username, role: found.role, credit: found.credit };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateNavbarAuth();
-                closeAuthModal();
-                showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
-            } else {
-                showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
-            }
-        }
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            await fetchCloudData(true);
-            const u = document.getElementById('reg-user').value.trim();
-            const p = document.getElementById('reg-pass').value.trim();
-            const ans = document.getElementById('reg-answer').value.trim();
-            if (users.some(x => x.username === u)) return showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
-
-            users.push({ username: u, pass: p, role: 'USER', credit: 500, answer: ans });
-            await saveCloudData();
-
-            currentUser = { username: u, role: 'USER', credit: 500 };
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateNavbarAuth();
-            closeAuthModal();
-            renderAdminUsersList();
-            showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
-        }
-
-        async function handleForgot(e) {
-            e.preventDefault();
-            await fetchCloudData(true);
-            const u = document.getElementById('forgot-user').value.trim();
-            const ans = document.getElementById('forgot-answer').value.trim();
-            const newP = document.getElementById('forgot-newpass').value.trim();
-            let user = users.find(x => x.username === u);
-            if (!user) return showToast('ไม่พบ Username นี้', 'warning');
-            if (user.answer !== ans) return showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
-
-            user.pass = newP;
-            await saveCloudData();
-            switchAuthView('login');
-            renderAdminUsersList();
-            showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
-        }
+        };
 
         // GACHA CANVAS & LOGIC
-        function drawWheel() {
+        window.drawWheel = function() {
             const canvas = document.getElementById('gachaCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -834,9 +808,9 @@
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
             ctx.stroke();
-        }
+        };
 
-        async function spinGachaWheel() {
+        window.spinGachaWheel = async function() {
             if (!currentUser) return openAuthModal('login');
             if (isSpinning) return;
             if (currentUser.credit < gachaPrice) return showToast('Points ของคุณไม่พอหมุนกาชา', 'warning');
@@ -904,17 +878,17 @@
                 }
             }
             requestAnimationFrame(animate);
-        }
+        };
 
-        async function updateUserCreditInStorage() {
+        window.updateUserCreditInStorage = async function() {
             let u = users.find(x => x.username === currentUser.username);
             if (u) u.credit = currentUser.credit;
             await saveCloudData();
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
+        };
 
         // BACCARAT GAME
-        async function playBaccarat(betOn) {
+        window.playBaccarat = async function(betOn) {
             if (!currentUser) return openAuthModal('login');
             let bet = parseInt(document.getElementById('bac-bet-amount').value) || 0;
             if (bet <= 0) return showToast('กรุณาระบุยอดเดิมพัน', 'warning');
@@ -942,18 +916,18 @@
             } else {
                 showToast(`เสียใจด้วย ผลออก ${res.toUpperCase()}`, 'warning');
             }
-        }
+        };
 
         // ADMIN FUNCTIONS
-        async function saveGachaPrice() {
+        window.saveGachaPrice = async function() {
             gachaPrice = parseInt(document.getElementById('setting-gacha-price').value) || 50;
             await saveCloudData();
             document.getElementById('gacha-cost-display').innerText = gachaPrice;
             document.getElementById('btn-gacha-price').innerText = gachaPrice;
             showToast('บันทึกราคาหมุนกาชาเรียบร้อย', 'success');
-        }
+        };
 
-        function renderAdminGachaList() {
+        window.renderAdminGachaList = function() {
             let list = document.getElementById('admin-gacha-list');
             if(!list) return;
             list.innerHTML = '';
@@ -969,9 +943,9 @@
                 `;
             });
             drawWheel();
-        }
+        };
 
-        async function handleAddGachaItem(e) {
+        window.handleAddGachaItem = async function(e) {
             e.preventDefault();
             gachaItems.push({
                 id: Date.now(),
@@ -984,16 +958,16 @@
             renderAdminGachaList();
             e.target.reset();
             showToast('เพิ่มรายการกาชาสำเร็จ', 'success');
-        }
+        };
 
-        async function deleteGacha(id) {
+        window.deleteGacha = async function(id) {
             gachaItems = gachaItems.filter(x => x.id !== id);
             await saveCloudData();
             renderAdminGachaList();
             showToast('ลบรายการสำเร็จ', 'info');
-        }
+        };
 
-        function renderAdminUsersList() {
+        window.renderAdminUsersList = function() {
             let list = document.getElementById('admin-users-list');
             if(!list) return;
             list.innerHTML = '';
@@ -1012,9 +986,9 @@
                     </tr>
                 `;
             });
-        }
+        };
 
-        async function adminTopUp(uname) {
+        window.adminTopUp = async function(uname) {
             let amount = parseInt(prompt(`ระบุจำนวน Points ที่ต้องการเติมให้ ${uname}:`));
             if (!isNaN(amount) && amount > 0) {
                 let u = users.find(x => x.username === uname);
@@ -1025,9 +999,9 @@
                     renderAdminUsersList();
                 }
             }
-        }
+        };
 
-        async function adminDeduct(uname) {
+        window.adminDeduct = async function(uname) {
             let amount = parseInt(prompt(`ระบุจำนวน Points ที่ต้องการหักออกจาก ${uname}:`));
             if (!isNaN(amount) && amount > 0) {
                 let u = users.find(x => x.username === uname);
@@ -1038,9 +1012,9 @@
                     renderAdminUsersList();
                 }
             }
-        }
+        };
 
-        async function adminResetPass(uname) {
+        window.adminResetPass = async function(uname) {
             let newP = prompt(`ตั้งรหัสผ่านใหม่สำหรับ ${uname}:`);
             if (newP) {
                 let u = users.find(x => x.username === uname);
@@ -1051,9 +1025,9 @@
                     renderAdminUsersList();
                 }
             }
-        }
+        };
 
-        async function adminDeleteUser(uname) {
+        window.adminDeleteUser = async function(uname) {
             if (uname === 'admin') {
                 return showToast('ไม่สามารถลบบัญชีผู้ดูแลระบบ (Admin) หลักได้', 'warning');
             }
@@ -1063,10 +1037,9 @@
                 showToast(`ลบบัญชี ${uname} เรียบร้อยแล้ว`, 'success');
                 renderAdminUsersList();
             }
-        }
+        };
 
-        // MUSIC ADMIN MANAGEMENT
-        function renderAdminMusicList() {
+        window.renderAdminMusicList = function() {
             let list = document.getElementById('admin-music-list');
             if(!list) return;
             list.innerHTML = '';
@@ -1079,9 +1052,9 @@
                     </tr>
                 `;
             });
-        }
+        };
 
-        async function handleAddMusic(e) {
+        window.handleAddMusic = async function(e) {
             e.preventDefault();
             const title = document.getElementById('music-title-input').value.trim();
             const url = document.getElementById('music-url-input').value.trim();
@@ -1092,16 +1065,16 @@
                 e.target.reset();
                 showToast('เพิ่มเพลงใหม่สำเร็จ', 'success');
             }
-        }
+        };
 
-        async function deleteMusic(id) {
+        window.deleteMusic = async function(id) {
             playlist = playlist.filter(x => x.id !== id);
             await saveCloudData();
             renderAdminMusicList();
             showToast('ลบเพลงสำเร็จ', 'info');
-        }
+        };
 
-        async function handleSaveWebSettings(e) {
+        window.handleSaveWebSettings = async function(e) {
             e.preventDefault();
             webSettings = {
                 name: document.getElementById('setting-brand-name').value,
@@ -1113,10 +1086,9 @@
             await saveCloudData();
             applyWebSettings();
             showToast('บันทึกการตั้งค่าเว็บเรียบร้อย', 'success');
-        }
+        };
 
-        // TOAST
-        function showToast(msg, type = 'info') {
+        window.showToast = function(msg, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const colors = { success: 'bg-emerald-500 text-slate-950 font-bold', warning: 'bg-amber-500 text-slate-950 font-bold', info: 'bg-purple-600 text-white font-bold' };
@@ -1124,7 +1096,7 @@
             toast.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3500);
-        }
+        };
     </script>
 </body>
 </html>
