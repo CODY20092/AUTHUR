@@ -90,18 +90,13 @@
     <!-- Hidden YouTube Audio Player Container -->
     <div id="youtube-player-container" class="hidden"></div>
 
-    <!-- ================================================================= -->
-    <!-- VIEW 1: CLIENT WEBSITE (หน้าบ้านสำหรับลูกค้า) -->
-    <!-- ================================================================= -->
+    <!-- VIEW 1: CLIENT WEBSITE -->
     <div id="view-client" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        
-        <!-- Announcement Bar -->
         <div class="bg-gradient-to-r from-purple-900/40 via-cyan-900/40 to-purple-900/40 border border-cyan-500/30 p-3.5 rounded-2xl flex items-center gap-3">
             <span class="bg-cyan-500 text-slate-950 font-bold text-xs px-2.5 py-1 rounded-lg">ประกาศ</span>
             <marquee id="client-announcement" class="text-xs sm:text-sm text-cyan-200">ยินดีต้อนรับสู่ระบบเว็บสุ่มรางวัลและคาสิโนบาคาร่าออนไลน์ สมัครสมาชิกรับเครดิตฟรีเริ่มต้น!</marquee>
         </div>
 
-        <!-- Hero Banner & Music Player Widget -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative h-64 sm:h-80">
                 <img id="hero-banner-img" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000&auto=format&fit=crop&q=80" class="w-full h-full object-cover">
@@ -111,7 +106,6 @@
                 </div>
             </div>
 
-            <!-- MUSIC PLAYER CARD -->
             <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
                 <div>
                     <h3 class="font-bold text-white flex items-center gap-2">
@@ -127,7 +121,6 @@
                             <p id="current-song-status" class="text-xs text-slate-400">กดปุ่มเล่นเพื่อฟังเพลง</p>
                         </div>
                     </div>
-                    <!-- Playback Controls -->
                     <div class="flex items-center justify-center gap-4 mt-6">
                         <button onclick="prevSong()" title="เพลงก่อนหน้า" class="p-2 text-slate-400 hover:text-white transition"><i class="fa-solid fa-backward text-lg"></i></button>
                         <button onclick="toggleMusicPlay()" id="btn-play-pause" title="เล่น/หยุด" class="w-12 h-12 rounded-full bg-cyan-500 text-slate-950 font-bold flex items-center justify-center shadow-lg shadow-cyan-500/30 hover:bg-cyan-400 transition"><i class="fa-solid fa-play text-lg"></i></button>
@@ -137,7 +130,6 @@
             </div>
         </div>
 
-        <!-- Tabs Nav -->
         <div class="space-y-6">
             <div class="flex items-center gap-3 border-b border-slate-800 pb-3 overflow-x-auto">
                 <button onclick="switchClientTab('gacha')" id="client-tab-gacha" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-cyan-500 text-slate-950 transition whitespace-nowrap">
@@ -148,7 +140,6 @@
                 </button>
             </div>
 
-            <!-- TAB 1: GACHA WHEEL -->
             <div id="client-sec-gacha" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="text-center max-w-lg mx-auto">
                     <span class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30 text-xs font-bold">LUCKY GACHA WHEEL</span>
@@ -177,7 +168,6 @@
                 </div>
             </div>
 
-            <!-- TAB 2: BACCARAT -->
             <div id="client-sec-baccarat" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
                 <div class="text-center max-w-lg mx-auto">
                     <span class="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold">CASINO GAME</span>
@@ -218,9 +208,7 @@
         </div>
     </div>
 
-    <!-- ================================================================= -->
-    <!-- VIEW 2: ADMIN CONTROL PANEL -->
-    <!-- ================================================================= -->
+    <!-- VIEW 2: ADMIN PANEL -->
     <div id="view-admin" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
         <div class="bg-gradient-to-r from-purple-900 to-slate-900 border border-purple-500/40 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -239,7 +227,6 @@
             <button onclick="switchAdminTab('music')" id="admin-tab-music" class="px-4 py-2 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition whitespace-nowrap">จัดการเพลง YouTube</button>
         </div>
 
-        <!-- ADMIN TAB 1: BUILDER -->
         <div id="admin-sec-builder" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
             <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">ตั้งค่าหน้าเว็บ (รองรับลิงก์ Discord CDN)</h3>
             <form onsubmit="handleSaveWebSettings(event)" class="space-y-4 max-w-xl">
@@ -263,14 +250,10 @@
             </form>
         </div>
 
-        <!-- ADMIN TAB 2: GACHA & RATES (%) -->
         <div id="admin-sec-gacha" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
             <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">จัดการรายการและเรทเปอร์เซ็นต์ (%) กาชา</h3>
-            
             <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center justify-between gap-4 max-w-md">
-                <div>
-                    <h4 class="font-bold text-white text-sm">ราคาหมุนต่อครั้ง</h4>
-                </div>
+                <div><h4 class="font-bold text-white text-sm">ราคาหมุนต่อครั้ง</h4></div>
                 <div class="flex items-center gap-2">
                     <input type="number" id="setting-gacha-price" value="50" min="1" class="w-24 bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-center text-amber-400 font-bold">
                     <button onclick="saveGachaPrice()" class="px-3 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-xl">บันทึก</button>
@@ -313,7 +296,6 @@
             </div>
         </div>
 
-        <!-- ADMIN TAB 3: USERS & ADMIN TOPUP/DEDUCT/DELETE -->
         <div id="admin-sec-users" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
             <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">จัดการรายชื่อสมาชิก & เติม/หักเครดิต/ลบสมาชิก (Firebase Real-time)</h3>
             <div class="overflow-x-auto">
@@ -331,7 +313,6 @@
             </div>
         </div>
 
-        <!-- ADMIN TAB 4: YOUTUBE MUSIC MANAGER -->
         <div id="admin-sec-music" class="hidden bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6">
             <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-3">จัดการเพลง YouTube ประจำเว็บ</h3>
             <form onsubmit="handleAddMusic(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800 items-end">
@@ -361,9 +342,7 @@
         </div>
     </div>
 
-    <!-- ================================================================= -->
-    <!-- AUTH MODALS (LOGIN / REGISTER / FORGOT PASSWORD) -->
-    <!-- ================================================================= -->
+    <!-- AUTH MODALS -->
     <div id="auth-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full relative space-y-6 shadow-2xl">
             <button onclick="closeAuthModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -436,7 +415,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
         <p>© 2026 IJERDID Gaming & Casino Platform. All rights reserved.</p>
     </footer>
@@ -449,16 +427,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // ==========================================================
-        // ⚙️ ตั้งค่า Firebase Config ของคุณตรงนี้ (สร้างฟรีที่ Firebase Console)
-        // ==========================================================
+        // ⚙️ ใส่ค่า firebaseConfig ของคุณตรงนี้
         const firebaseConfig = {
             apiKey: "AIzaSyBz3JiHXay4PMmDrGqMPzlyG60p7JRlJJU",
             authDomain: "arthur-f415e.firebaseapp.com",
             projectId: "arthur-f415e",
             storageBucket: "arthur-f415e.firebasestorage.app",
             messagingSenderId: "681898124925",
-            appId: ""1:681898124925:web:3944f05bbb7ccaf0257314
+            appId: "1:681898124925:web:3944f05bbb7ccaf0257314"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -480,7 +456,6 @@
         let isPlaying = false;
         let ytPlayer = null;
 
-        // ฟังก์ชันบันทึกข้อมูลขึ้น Firebase Cloud
         window.saveCloudData = async function() {
             try {
                 await setDoc(window.docRef, {
@@ -495,28 +470,43 @@
             }
         };
 
-        // ใช้ Realtime Listener (onSnapshot) ซิงค์ข้อมูลอัตโนมัติทันทีแบบเรียลไทม์จากทุกเครื่อง
         onSnapshot(window.docRef, (docSnap) => {
             if (docSnap.exists()) {
                 let data = docSnap.data();
-                users = data.users || [];
-                gachaItems = data.gachaItems || [];
+                users = data.users || [
+                    { username: 'admin', pass: '1234', role: 'ADMIN', credit: 9999, answer: 'admin' }
+                ];
+                gachaItems = data.gachaItems || [
+                    { id: 1, label: 'โบนัส 10 P', points: 10, rate: 40, color: '#3b82f6' },
+                    { id: 2, label: 'สกิน EVO UR', points: 500, rate: 5, color: '#eab308' },
+                    { id: 3, label: 'เกลือ (0 P)', points: 0, rate: 30, color: '#64748b' },
+                    { id: 4, label: 'โบนัส 100 P', points: 100, rate: 15, color: '#10b981' },
+                    { id: 5, label: 'โค้ดเพชร FF', points: 250, rate: 10, color: '#ec4899' }
+                ];
                 gachaPrice = data.gachaPrice || 50;
-                playlist = data.playlist || [];
-                webSettings = data.webSettings || {};
+                playlist = data.playlist || [
+                    { id: 1, title: 'EDM Cyberpunk Beats', url: 'https://youtu.be/36YnV9STBqc' },
+                    { id: 2, title: 'Gaming Lounge Music', url: 'https://youtu.be/5qap5aO4i9A' }
+                ];
+                webSettings = data.webSettings || {
+                    name: 'IJERDID PLATFORM',
+                    tagline: 'GACHA & CASINO PLATFORM',
+                    announcement: 'ยินดีต้อนรับสู่ระบบเว็บสุ่มรางวัลและคาสิโนบาคาร่าออนไลน์ สมัครสมาชิกรับเครดิตฟรีเริ่มต้น!',
+                    bannerImg: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000&auto=format&fit=crop&q=80',
+                    bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
+                };
 
-                applyWebSettings();
-                syncCurrentUserState();
-                updateNavbarAuth();
-                renderAdminGachaList();
-                renderAdminUsersList();
-                renderAdminMusicList();
+                window.applyWebSettings();
+                window.syncCurrentUserState();
+                window.updateNavbarAuth();
+                window.renderAdminGachaList();
+                window.renderAdminUsersList();
+                window.renderAdminMusicList();
                 document.getElementById('gacha-cost-display').innerText = gachaPrice;
                 document.getElementById('btn-gacha-price').innerText = gachaPrice;
-                drawWheel();
+                window.drawWheel();
             } else {
-                // ถ้ายังไม่มีข้อมูลใน Firestore ให้สร้างค่าเริ่มต้น
-                saveCloudData();
+                window.saveCloudData();
             }
         });
 
@@ -542,12 +532,11 @@
                 currentUser = found;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
             } else {
-                logout();
-                showToast('บัญชีของคุณถูกลบออกจากระบบโดยผู้ดูแลระบบ', 'warning');
+                window.logout();
+                window.showToast('บัญชีของคุณถูกลบออกจากระบบโดยผู้ดูแลระบบ', 'warning');
             }
         };
 
-        // ฟังก์ชันสมัครสมาชิกใหม่
         window.handleRegister = async function(e) {
             e.preventDefault();
             const u = document.getElementById('reg-user').value.trim();
@@ -555,21 +544,20 @@
             const ans = document.getElementById('reg-answer').value.trim();
 
             if (users.some(x => x.username === u)) {
-                return showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
+                return window.showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
             }
 
             users.push({ username: u, pass: p, role: 'USER', credit: 500, answer: ans });
-            await saveCloudData();
+            await window.saveCloudData();
 
             currentUser = { username: u, role: 'USER', credit: 500 };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            updateNavbarAuth();
-            closeAuthModal();
-            renderAdminUsersList();
-            showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
+            window.updateNavbarAuth();
+            window.closeAuthModal();
+            window.renderAdminUsersList();
+            window.showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
         };
 
-        // ฟังก์ชันเข้าสู่ระบบ
         window.handleLogin = function(e) {
             e.preventDefault();
             const u = document.getElementById('login-user').value.trim();
@@ -578,35 +566,33 @@
             if (found) {
                 currentUser = { username: found.username, role: found.role, credit: found.credit };
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateNavbarAuth();
-                closeAuthModal();
-                showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
+                window.updateNavbarAuth();
+                window.closeAuthModal();
+                window.showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
             } else {
-                showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
+                window.showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
             }
         };
 
-        // ฟังก์ชันลืมรหัสผ่าน
         window.handleForgot = async function(e) {
             e.preventDefault();
             const u = document.getElementById('forgot-user').value.trim();
             const ans = document.getElementById('forgot-answer').value.trim();
             const newP = document.getElementById('forgot-newpass').value.trim();
             let user = users.find(x => x.username === u);
-            if (!user) return showToast('ไม่พบ Username นี้', 'warning');
-            if (user.answer !== ans) return showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
+            if (!user) return window.showToast('ไม่พบ Username นี้', 'warning');
+            if (user.answer !== ans) return window.showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
 
             user.pass = newP;
-            await saveCloudData();
-            switchAuthView('login');
-            renderAdminUsersList();
-            showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
+            await window.saveCloudData();
+            window.switchAuthView('login');
+            window.renderAdminUsersList();
+            window.showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
         };
 
-        // YOUTUBE API PLAYER SETUP
         window.onYouTubeIframeAPIReady = function() {
             if(!playlist || playlist.length === 0) return;
-            let ytId = extractYouTubeId(playlist[0].url);
+            let ytId = window.extractYouTubeId(playlist[0].url);
             document.getElementById('current-song-title').innerText = playlist[0].title;
             
             ytPlayer = new YT.Player('youtube-player-container', {
@@ -615,7 +601,7 @@
                 videoId: ytId,
                 playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1, 'origin': window.location.origin },
                 events: {
-                    'onStateChange': onPlayerStateChange
+                    'onStateChange': window.onPlayerStateChange
                 }
             });
         };
@@ -629,13 +615,13 @@
 
         window.onPlayerStateChange = function(event) {
             if (event.data === YT.PlayerState.ENDED) {
-                nextSong();
+                window.nextSong();
             }
         };
 
         window.toggleMusicPlay = function() {
-            if(!playlist || playlist.length === 0) return showToast('ยังไม่มีเพลงในระบบ', 'warning');
-            if(!ytPlayer || typeof ytPlayer.playVideo !== 'function') return showToast('เครื่องเล่นเพลงกำลังโหลด กรุณาลองใหม่อีกครั้ง', 'warning');
+            if(!playlist || playlist.length === 0) return window.showToast('ยังไม่มีเพลงในระบบ', 'warning');
+            if(!ytPlayer || typeof ytPlayer.playVideo !== 'function') return window.showToast('เครื่องเล่นเพลงกำลังโหลด กรุณาลองใหม่อีกครั้ง', 'warning');
 
             if (isPlaying) {
                 ytPlayer.pauseVideo();
@@ -659,20 +645,20 @@
         window.prevSong = function() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            playCurrentSongIndex();
+            window.playCurrentSongIndex();
         };
 
         window.nextSong = function() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            playCurrentSongIndex();
+            window.playCurrentSongIndex();
         };
 
         window.playCurrentSongIndex = function() {
             let song = playlist[currentSongIndex];
             document.getElementById('current-song-title').innerText = song.title;
             if(ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                ytPlayer.loadVideoById(extractYouTubeId(song.url));
+                ytPlayer.loadVideoById(window.extractYouTubeId(song.url));
                 if(isPlaying) {
                     ytPlayer.unMute();
                     ytPlayer.setVolume(100);
@@ -714,18 +700,18 @@
         window.logout = function() {
             currentUser = null;
             localStorage.removeItem('currentUser');
-            updateNavbarAuth();
-            switchMainView('client');
-            showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+            window.updateNavbarAuth();
+            window.switchMainView('client');
+            window.showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
         };
 
         window.switchMainView = function(view) {
             if (view === 'admin' && (!currentUser || currentUser.role !== 'ADMIN')) {
-                return showToast('เฉพาะบัญชีแอดมินเท่านั้น!', 'warning');
+                return window.showToast('เฉพาะบัญชีแอดมินเท่านั้น!', 'warning');
             }
             document.getElementById('view-client').classList.toggle('hidden', view !== 'client');
             document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-            if (view === 'client') switchClientTab('gacha');
+            if (view === 'client') window.switchClientTab('gacha');
         };
 
         window.switchClientTab = function(tab) {
@@ -735,7 +721,7 @@
             });
             document.getElementById(`client-sec-${tab}`).classList.remove('hidden');
             document.getElementById(`client-tab-${tab}`).className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-cyan-500 text-slate-950 transition whitespace-nowrap";
-            if (tab === 'gacha') setTimeout(drawWheel, 50);
+            if (tab === 'gacha') setTimeout(window.drawWheel, 50);
         };
 
         window.switchAdminTab = function(tab) {
@@ -749,7 +735,7 @@
 
         window.openAuthModal = function(mode) {
             document.getElementById('auth-modal').classList.remove('hidden');
-            switchAuthView(mode);
+            window.switchAuthView(mode);
         };
         window.closeAuthModal = function() {
             document.getElementById('auth-modal').classList.add('hidden');
@@ -811,13 +797,13 @@
         };
 
         window.spinGachaWheel = async function() {
-            if (!currentUser) return openAuthModal('login');
+            if (!currentUser) return window.openAuthModal('login');
             if (isSpinning) return;
-            if (currentUser.credit < gachaPrice) return showToast('Points ของคุณไม่พอหมุนกาชา', 'warning');
+            if (currentUser.credit < gachaPrice) return window.showToast('Points ของคุณไม่พอหมุนกาชา', 'warning');
 
             currentUser.credit -= gachaPrice;
-            await updateUserCreditInStorage();
-            updateNavbarAuth();
+            await window.updateUserCreditInStorage();
+            window.updateNavbarAuth();
 
             isSpinning = true;
             document.getElementById('btn-spin-gacha').disabled = true;
@@ -853,7 +839,7 @@
                 let progress = Math.min((now - startT) / duration, 1);
                 let easeOut = 1 - Math.pow(1 - progress, 3);
                 currentAngle = initialAngle + (finalAngle - initialAngle) * easeOut;
-                drawWheel();
+                window.drawWheel();
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
@@ -863,9 +849,9 @@
                     let prize = gachaItems[winningIndex];
                     if (prize.points > 0) {
                         currentUser.credit += prize.points;
-                        updateUserCreditInStorage().then(() => updateNavbarAuth());
+                        window.updateUserCreditInStorage().then(() => window.updateNavbarAuth());
                     }
-                    showToast(`ยินดีด้วย! คุณได้รับ "${prize.label}"`, 'success');
+                    window.showToast(`ยินดีด้วย! คุณได้รับ "${prize.label}"`, 'success');
 
                     let historyBox = document.getElementById('gacha-history');
                     if (historyBox.querySelector('p')) historyBox.innerHTML = '';
@@ -883,20 +869,20 @@
         window.updateUserCreditInStorage = async function() {
             let u = users.find(x => x.username === currentUser.username);
             if (u) u.credit = currentUser.credit;
-            await saveCloudData();
+            await window.saveCloudData();
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         };
 
         // BACCARAT GAME
         window.playBaccarat = async function(betOn) {
-            if (!currentUser) return openAuthModal('login');
+            if (!currentUser) return window.openAuthModal('login');
             let bet = parseInt(document.getElementById('bac-bet-amount').value) || 0;
-            if (bet <= 0) return showToast('กรุณาระบุยอดเดิมพัน', 'warning');
-            if (currentUser.credit < bet) return showToast('Points ไม่พอเดิมพัน', 'warning');
+            if (bet <= 0) return window.showToast('กรุณาระบุยอดเดิมพัน', 'warning');
+            if (currentUser.credit < bet) return window.showToast('Points ไม่พอเดิมพัน', 'warning');
 
             currentUser.credit -= bet;
-            await updateUserCreditInStorage();
-            updateNavbarAuth();
+            await window.updateUserCreditInStorage();
+            window.updateNavbarAuth();
 
             let pScore = Math.floor(Math.random() * 10);
             let bScore = Math.floor(Math.random() * 10);
@@ -910,21 +896,21 @@
             if (betOn === res) {
                 let win = res === 'tie' ? bet * 9 : (res === 'player' ? bet * 2 : Math.floor(bet * 1.95));
                 currentUser.credit += win;
-                await updateUserCreditInStorage();
-                updateNavbarAuth();
-                showToast(`ชนะเดิมพัน! ได้รับ ${win} Points`, 'success');
+                await window.updateUserCreditInStorage();
+                window.updateNavbarAuth();
+                window.showToast(`ชนะเดิมพัน! ได้รับ ${win} Points`, 'success');
             } else {
-                showToast(`เสียใจด้วย ผลออก ${res.toUpperCase()}`, 'warning');
+                window.showToast(`เสียใจด้วย ผลออก ${res.toUpperCase()}`, 'warning');
             }
         };
 
         // ADMIN FUNCTIONS
         window.saveGachaPrice = async function() {
             gachaPrice = parseInt(document.getElementById('setting-gacha-price').value) || 50;
-            await saveCloudData();
+            await window.saveCloudData();
             document.getElementById('gacha-cost-display').innerText = gachaPrice;
             document.getElementById('btn-gacha-price').innerText = gachaPrice;
-            showToast('บันทึกราคาหมุนกาชาเรียบร้อย', 'success');
+            window.showToast('บันทึกราคาหมุนกาชาเรียบร้อย', 'success');
         };
 
         window.renderAdminGachaList = function() {
@@ -942,7 +928,7 @@
                     </tr>
                 `;
             });
-            drawWheel();
+            window.drawWheel();
         };
 
         window.handleAddGachaItem = async function(e) {
@@ -954,17 +940,17 @@
                 rate: parseInt(document.getElementById('gacha-rate-input').value),
                 color: document.getElementById('gacha-color-input').value
             });
-            await saveCloudData();
-            renderAdminGachaList();
+            await window.saveCloudData();
+            window.renderAdminGachaList();
             e.target.reset();
-            showToast('เพิ่มรายการกาชาสำเร็จ', 'success');
+            window.showToast('เพิ่มรายการกาชาสำเร็จ', 'success');
         };
 
         window.deleteGacha = async function(id) {
             gachaItems = gachaItems.filter(x => x.id !== id);
-            await saveCloudData();
-            renderAdminGachaList();
-            showToast('ลบรายการสำเร็จ', 'info');
+            await window.saveCloudData();
+            window.renderAdminGachaList();
+            window.showToast('ลบรายการสำเร็จ', 'info');
         };
 
         window.renderAdminUsersList = function() {
@@ -994,9 +980,9 @@
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.credit += amount;
-                    await saveCloudData();
-                    showToast(`เติมเครดิตให้ ${uname} สำเร็จ (+${amount} P)`, 'success');
-                    renderAdminUsersList();
+                    await window.saveCloudData();
+                    window.showToast(`เติมเครดิตให้ ${uname} สำเร็จ (+${amount} P)`, 'success');
+                    window.renderAdminUsersList();
                 }
             }
         };
@@ -1007,9 +993,9 @@
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.credit = Math.max(0, u.credit - amount);
-                    await saveCloudData();
-                    showToast(`หักเครดิตจาก ${uname} สำเร็จ (-${amount} P)`, 'warning');
-                    renderAdminUsersList();
+                    await window.saveCloudData();
+                    window.showToast(`หักเครดิตจาก ${uname} สำเร็จ (-${amount} P)`, 'warning');
+                    window.renderAdminUsersList();
                 }
             }
         };
@@ -1020,22 +1006,22 @@
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.pass = newP;
-                    await saveCloudData();
-                    showToast(`เปลี่ยนรหัสผ่านของ ${uname} สำเร็จ`, 'success');
-                    renderAdminUsersList();
+                    await window.saveCloudData();
+                    window.showToast(`เปลี่ยนรหัสผ่านของ ${uname} สำเร็จ`, 'success');
+                    window.renderAdminUsersList();
                 }
             }
         };
 
         window.adminDeleteUser = async function(uname) {
             if (uname === 'admin') {
-                return showToast('ไม่สามารถลบบัญชีผู้ดูแลระบบ (Admin) หลักได้', 'warning');
+                return window.showToast('ไม่สามารถลบบัญชีผู้ดูแลระบบ (Admin) หลักได้', 'warning');
             }
             if (confirm(`คุณต้องการลบบัญชีผู้ใช้ "${uname}" ใช่หรือไม่?`)) {
                 users = users.filter(x => x.username !== uname);
-                await saveCloudData();
-                showToast(`ลบบัญชี ${uname} เรียบร้อยแล้ว`, 'success');
-                renderAdminUsersList();
+                await window.saveCloudData();
+                window.showToast(`ลบบัญชี ${uname} เรียบร้อยแล้ว`, 'success');
+                window.renderAdminUsersList();
             }
         };
 
@@ -1060,18 +1046,18 @@
             const url = document.getElementById('music-url-input').value.trim();
             if(title && url) {
                 playlist.push({ id: Date.now(), title, url });
-                await saveCloudData();
-                renderAdminMusicList();
+                await window.saveCloudData();
+                window.renderAdminMusicList();
                 e.target.reset();
-                showToast('เพิ่มเพลงใหม่สำเร็จ', 'success');
+                window.showToast('เพิ่มเพลงใหม่สำเร็จ', 'success');
             }
         };
 
         window.deleteMusic = async function(id) {
             playlist = playlist.filter(x => x.id !== id);
-            await saveCloudData();
-            renderAdminMusicList();
-            showToast('ลบเพลงสำเร็จ', 'info');
+            await window.saveCloudData();
+            window.renderAdminMusicList();
+            window.showToast('ลบเพลงสำเร็จ', 'info');
         };
 
         window.handleSaveWebSettings = async function(e) {
@@ -1083,9 +1069,9 @@
                 bannerImg: document.getElementById('setting-banner-img').value,
                 bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
             };
-            await saveCloudData();
-            applyWebSettings();
-            showToast('บันทึกการตั้งค่าเว็บเรียบร้อย', 'success');
+            await window.saveCloudData();
+            window.applyWebSettings();
+            window.showToast('บันทึกการตั้งค่าเว็บเรียบร้อย', 'success');
         };
 
         window.showToast = function(msg, type = 'info') {
