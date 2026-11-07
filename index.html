@@ -41,6 +41,10 @@
             filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.5));
         }
     </style>
+
+    <!-- Firebase App & Firestore SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
 
@@ -422,12 +426,11 @@
     <!-- YouTube IFrame API Script -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
-    <!-- Firebase SDK (Modular v10) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+    <!-- Main JavaScript Logic (Firebase Compat) -->
+    <script>
+        // ==========================================================
         // ⚙️ ใส่ค่า firebaseConfig ของคุณตรงนี้
+        // ==========================================================
         const firebaseConfig = {
             apiKey: "AIzaSyBz3JiHXay4PMmDrGqMPzlyG60p7JRlJJU",
             authDomain: "arthur-f415e.firebaseapp.com",
@@ -437,11 +440,10 @@
             appId: "1:681898124925:web:3944f05bbb7ccaf0257314"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.db = db;
-        window.docRef = doc(db, "gamedata", "mainconfig");
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const docRef = db.collection("gamedata").doc("mainconfig");
 
         let users = [];
         let gachaItems = [];
@@ -456,26 +458,33 @@
         let isPlaying = false;
         let ytPlayer = null;
 
-        window.saveCloudData = async function() {
+        // บันทึกข้อมูลขึ้น Cloud
+        async function saveCloudData() {
             try {
-                await setDoc(window.docRef, {
+                await docRef.set({
                     users,
                     gachaItems,
                     gachaPrice,
                     playlist,
                     webSettings
-                });
+                }, { merge: true });
             } catch(err) {
                 console.error("Firebase save error:", err);
             }
-        };
+        }
 
-        onSnapshot(window.docRef, (docSnap) => {
-            if (docSnap.exists()) {
+        // Real-time Listener ซิงค์ข้อมูลข้ามเครื่องอัตโนมัติทันที
+        docRef.onSnapshot((docSnap) => {
+            if (docSnap.exists) {
                 let data = docSnap.data();
-                users = data.users || [
-                    { username: 'admin', pass: '1234', role: 'ADMIN', credit: 9999, answer: 'admin' }
-                ];
+                
+                // ตรวจสอบและบังคับให้มีแอดมินเริ่มต้นเสมอ
+                let loadedUsers = data.users || [];
+                if (!loadedUsers.some(u => u.username === 'admin')) {
+                    loadedUsers.unshift({ username: 'admin', pass: '1234', role: 'ADMIN', credit: 9999, answer: 'admin' });
+                }
+                users = loadedUsers;
+
                 gachaItems = data.gachaItems || [
                     { id: 1, label: 'โบนัส 10 P', points: 10, rate: 40, color: '#3b82f6' },
                     { id: 2, label: 'สกิน EVO UR', points: 500, rate: 5, color: '#eab308' },
@@ -496,21 +505,39 @@
                     bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
                 };
 
-                window.applyWebSettings();
-                window.syncCurrentUserState();
-                window.updateNavbarAuth();
-                window.renderAdminGachaList();
-                window.renderAdminUsersList();
-                window.renderAdminMusicList();
+                applyWebSettings();
+                syncCurrentUserState();
+                updateNavbarAuth();
+                renderAdminGachaList();
+                renderAdminUsersList();
+                renderAdminMusicList();
                 document.getElementById('gacha-cost-display').innerText = gachaPrice;
                 document.getElementById('btn-gacha-price').innerText = gachaPrice;
-                window.drawWheel();
+                drawWheel();
             } else {
-                window.saveCloudData();
+                // สร้างค่าเริ่มต้นครั้งแรกถ้า Document ยังไม่ถูกสร้างใน Firestore
+                users = [{ username: 'admin', pass: '1234', role: 'ADMIN', credit: 9999, answer: 'admin' }];
+                gachaItems = [
+                    { id: 1, label: 'โบนัส 10 P', points: 10, rate: 40, color: '#3b82f6' },
+                    { id: 2, label: 'สกิน EVO UR', points: 500, rate: 5, color: '#eab308' },
+                    { id: 3, label: 'เกลือ (0 P)', points: 0, rate: 30, color: '#64748b' },
+                    { id: 4, label: 'โบนัส 100 P', points: 100, rate: 15, color: '#10b981' },
+                    { id: 5, label: 'โค้ดเพชร FF', points: 250, rate: 10, color: '#ec4899' }
+                ];
+                gachaPrice = 50;
+                playlist = [{ id: 1, title: 'EDM Cyberpunk Beats', url: 'https://youtu.be/36YnV9STBqc' }];
+                webSettings = {
+                    name: 'IJERDID PLATFORM',
+                    tagline: 'GACHA & CASINO PLATFORM',
+                    announcement: 'ยินดีต้อนรับสู่ระบบเว็บสุ่มรางวัลและคาสิโนบาคาร่าออนไลน์ สมัครสมาชิกรับเครดิตฟรีเริ่มต้น!',
+                    bannerImg: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000&auto=format&fit=crop&q=80',
+                    bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
+                };
+                saveCloudData();
             }
         });
 
-        window.applyWebSettings = function() {
+        function applyWebSettings() {
             document.getElementById('brand-name').innerText = webSettings.name || 'IJERDID PLATFORM';
             document.getElementById('brand-tagline').innerText = webSettings.tagline || 'GACHA & CASINO';
             document.getElementById('client-announcement').innerText = webSettings.announcement || '';
@@ -523,76 +550,90 @@
                 document.getElementById('setting-announcement').value = webSettings.announcement || '';
                 document.getElementById('setting-banner-img').value = webSettings.bannerImg || '';
             }
-        };
+        }
 
-        window.syncCurrentUserState = function() {
+        function syncCurrentUserState() {
             if(!currentUser) return;
             let found = users.find(x => x.username === currentUser.username);
             if(found) {
                 currentUser = found;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
             } else {
-                window.logout();
-                window.showToast('บัญชีของคุณถูกลบออกจากระบบโดยผู้ดูแลระบบ', 'warning');
+                logout();
+                showToast('บัญชีของคุณถูกลบออกจากระบบโดยผู้ดูแลระบบ', 'warning');
             }
-        };
+        }
 
-        window.handleRegister = async function(e) {
+        // ระบบสมัครสมาชิก (ตรวจสอบชื่อซ้ำอย่างปลอดภัย)
+        async function handleRegister(e) {
             e.preventDefault();
             const u = document.getElementById('reg-user').value.trim();
             const p = document.getElementById('reg-pass').value.trim();
             const ans = document.getElementById('reg-answer').value.trim();
 
-            if (users.some(x => x.username === u)) {
-                return window.showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
+            if (!u || !p) return showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
+
+            // ดึงข้อมูลล่าสุดจาก Cloud เพื่อป้องกันข้อมูลชนกัน
+            let docSnap = await docRef.get();
+            if (docSnap.exists) {
+                let latestData = docSnap.data();
+                if (latestData.users) users = latestData.users;
+            }
+
+            if (users.some(x => x.username.toLowerCase() === u.toLowerCase())) {
+                return showToast('Username นี้ถูกใช้งานแล้ว', 'warning');
             }
 
             users.push({ username: u, pass: p, role: 'USER', credit: 500, answer: ans });
-            await window.saveCloudData();
+            await saveCloudData();
 
             currentUser = { username: u, role: 'USER', credit: 500 };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            window.updateNavbarAuth();
-            window.closeAuthModal();
-            window.renderAdminUsersList();
-            window.showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
-        };
+            updateNavbarAuth();
+            closeAuthModal();
+            renderAdminUsersList();
+            showToast('สมัครสมาชิกสำเร็จ! รับฟรี 500 Points', 'success');
+        }
 
-        window.handleLogin = function(e) {
+        // ระบบเข้าสู่ระบบ (รองรับทั้ง Admin และ User ทั่วไป)
+        function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('login-user').value.trim();
             const p = document.getElementById('login-pass').value.trim();
+
             let found = users.find(x => x.username === u && x.pass === p);
             if (found) {
                 currentUser = { username: found.username, role: found.role, credit: found.credit };
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                window.updateNavbarAuth();
-                window.closeAuthModal();
-                window.showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
+                updateNavbarAuth();
+                closeAuthModal();
+                showToast(`ยินดีต้อนรับคุณ ${found.username}`, 'success');
             } else {
-                window.showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
+                showToast('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'warning');
             }
-        };
+        }
 
-        window.handleForgot = async function(e) {
+        async function handleForgot(e) {
             e.preventDefault();
             const u = document.getElementById('forgot-user').value.trim();
             const ans = document.getElementById('forgot-answer').value.trim();
             const newP = document.getElementById('forgot-newpass').value.trim();
+            
             let user = users.find(x => x.username === u);
-            if (!user) return window.showToast('ไม่พบ Username นี้', 'warning');
-            if (user.answer !== ans) return window.showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
+            if (!user) return showToast('ไม่พบ Username นี้', 'warning');
+            if (user.answer !== ans) return showToast('คำตอบยืนยันตัวตนไม่ถูกต้อง', 'warning');
 
             user.pass = newP;
-            await window.saveCloudData();
-            window.switchAuthView('login');
-            window.renderAdminUsersList();
-            window.showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
-        };
+            await saveCloudData();
+            switchAuthView('login');
+            renderAdminUsersList();
+            showToast('เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่', 'success');
+        }
 
-        window.onYouTubeIframeAPIReady = function() {
+        // YOUTUBE API PLAYER SETUP
+        function onYouTubeIframeAPIReady() {
             if(!playlist || playlist.length === 0) return;
-            let ytId = window.extractYouTubeId(playlist[0].url);
+            let ytId = extractYouTubeId(playlist[0].url);
             document.getElementById('current-song-title').innerText = playlist[0].title;
             
             ytPlayer = new YT.Player('youtube-player-container', {
@@ -601,27 +642,27 @@
                 videoId: ytId,
                 playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1, 'origin': window.location.origin },
                 events: {
-                    'onStateChange': window.onPlayerStateChange
+                    'onStateChange': onPlayerStateChange
                 }
             });
-        };
+        }
 
-        window.extractYouTubeId = function(url) {
+        function extractYouTubeId(url) {
             if (!url) return '36YnV9STBqc';
             let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             let match = url.match(regExp);
             return (match && match[2].length === 11) ? match[2] : url;
-        };
+        }
 
-        window.onPlayerStateChange = function(event) {
+        function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
-                window.nextSong();
+                nextSong();
             }
-        };
+        }
 
-        window.toggleMusicPlay = function() {
-            if(!playlist || playlist.length === 0) return window.showToast('ยังไม่มีเพลงในระบบ', 'warning');
-            if(!ytPlayer || typeof ytPlayer.playVideo !== 'function') return window.showToast('เครื่องเล่นเพลงกำลังโหลด กรุณาลองใหม่อีกครั้ง', 'warning');
+        function toggleMusicPlay() {
+            if(!playlist || playlist.length === 0) return showToast('ยังไม่มีเพลงในระบบ', 'warning');
+            if(!ytPlayer || typeof ytPlayer.playVideo !== 'function') return showToast('เครื่องเล่นเพลงกำลังโหลด กรุณาลองใหม่อีกครั้ง', 'warning');
 
             if (isPlaying) {
                 ytPlayer.pauseVideo();
@@ -640,34 +681,34 @@
                 document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-pause text-lg"></i>';
                 document.getElementById('music-disc-icon').classList.add('animate-spin');
             }
-        };
+        }
 
-        window.prevSong = function() {
+        function prevSong() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
-            window.playCurrentSongIndex();
-        };
+            playCurrentSongIndex();
+        }
 
-        window.nextSong = function() {
+        function nextSong() {
             if(!playlist || playlist.length === 0) return;
             currentSongIndex = (currentSongIndex + 1) % playlist.length;
-            window.playCurrentSongIndex();
-        };
+            playCurrentSongIndex();
+        }
 
-        window.playCurrentSongIndex = function() {
+        function playCurrentSongIndex() {
             let song = playlist[currentSongIndex];
             document.getElementById('current-song-title').innerText = song.title;
             if(ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-                ytPlayer.loadVideoById(window.extractYouTubeId(song.url));
+                ytPlayer.loadVideoById(extractYouTubeId(song.url));
                 if(isPlaying) {
                     ytPlayer.unMute();
                     ytPlayer.setVolume(100);
                     ytPlayer.playVideo();
                 }
             }
-        };
+        }
 
-        window.updateNavbarAuth = function() {
+        function updateNavbarAuth() {
             const authSec = document.getElementById('nav-auth-section');
             const adminBtn = document.getElementById('btn-view-admin');
             
@@ -695,59 +736,59 @@
                     <button onclick="openAuthModal('register')" class="hidden sm:block px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs border border-slate-700 transition">สมัครสมาชิก</button>
                 `;
             }
-        };
+        }
 
-        window.logout = function() {
+        function logout() {
             currentUser = null;
             localStorage.removeItem('currentUser');
-            window.updateNavbarAuth();
-            window.switchMainView('client');
-            window.showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
-        };
+            updateNavbarAuth();
+            switchMainView('client');
+            showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+        }
 
-        window.switchMainView = function(view) {
+        function switchMainView(view) {
             if (view === 'admin' && (!currentUser || currentUser.role !== 'ADMIN')) {
-                return window.showToast('เฉพาะบัญชีแอดมินเท่านั้น!', 'warning');
+                return showToast('เฉพาะบัญชีแอดมินเท่านั้น!', 'warning');
             }
             document.getElementById('view-client').classList.toggle('hidden', view !== 'client');
             document.getElementById('view-admin').classList.toggle('hidden', view !== 'admin');
-            if (view === 'client') window.switchClientTab('gacha');
-        };
+            if (view === 'client') switchClientTab('gacha');
+        }
 
-        window.switchClientTab = function(tab) {
+        function switchClientTab(tab) {
             ['gacha', 'baccarat'].forEach(t => {
                 document.getElementById(`client-sec-${t}`).classList.add('hidden');
                 document.getElementById(`client-tab-${t}`).className = "px-5 py-2.5 rounded-xl font-bold text-sm text-slate-400 hover:text-white transition whitespace-nowrap";
             });
             document.getElementById(`client-sec-${tab}`).classList.remove('hidden');
             document.getElementById(`client-tab-${tab}`).className = "px-5 py-2.5 rounded-xl font-bold text-sm bg-cyan-500 text-slate-950 transition whitespace-nowrap";
-            if (tab === 'gacha') setTimeout(window.drawWheel, 50);
-        };
+            if (tab === 'gacha') setTimeout(drawWheel, 50);
+        }
 
-        window.switchAdminTab = function(tab) {
+        function switchAdminTab(tab) {
             ['builder', 'gacha', 'users', 'music'].forEach(t => {
                 document.getElementById(`admin-sec-${t}`).classList.add('hidden');
                 document.getElementById(`admin-tab-${t}`).className = "px-4 py-2 rounded-xl font-bold text-xs text-slate-400 hover:text-white transition whitespace-nowrap";
             });
             document.getElementById(`admin-sec-${tab}`).classList.remove('hidden');
             document.getElementById(`admin-tab-${tab}`).className = "px-4 py-2 rounded-xl font-bold text-xs bg-purple-600 text-white transition whitespace-nowrap";
-        };
+        }
 
-        window.openAuthModal = function(mode) {
+        function openAuthModal(mode) {
             document.getElementById('auth-modal').classList.remove('hidden');
-            window.switchAuthView(mode);
-        };
-        window.closeAuthModal = function() {
+            switchAuthView(mode);
+        }
+        function closeAuthModal() {
             document.getElementById('auth-modal').classList.add('hidden');
-        };
-        window.switchAuthView = function(mode) {
+        }
+        function switchAuthView(mode) {
             ['login', 'register', 'forgot'].forEach(m => {
                 document.getElementById(`form-${m}`).classList.toggle('hidden', m !== mode);
             });
-        };
+        }
 
         // GACHA CANVAS & LOGIC
-        window.drawWheel = function() {
+        function drawWheel() {
             const canvas = document.getElementById('gachaCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -794,16 +835,16 @@
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
             ctx.stroke();
-        };
+        }
 
-        window.spinGachaWheel = async function() {
-            if (!currentUser) return window.openAuthModal('login');
+        async function spinGachaWheel() {
+            if (!currentUser) return openAuthModal('login');
             if (isSpinning) return;
-            if (currentUser.credit < gachaPrice) return window.showToast('Points ของคุณไม่พอหมุนกาชา', 'warning');
+            if (currentUser.credit < gachaPrice) return showToast('Points ของคุณไม่พอหมุนกาชา', 'warning');
 
             currentUser.credit -= gachaPrice;
-            await window.updateUserCreditInStorage();
-            window.updateNavbarAuth();
+            await updateUserCreditInStorage();
+            updateNavbarAuth();
 
             isSpinning = true;
             document.getElementById('btn-spin-gacha').disabled = true;
@@ -839,7 +880,7 @@
                 let progress = Math.min((now - startT) / duration, 1);
                 let easeOut = 1 - Math.pow(1 - progress, 3);
                 currentAngle = initialAngle + (finalAngle - initialAngle) * easeOut;
-                window.drawWheel();
+                drawWheel();
 
                 if (progress < 1) {
                     requestAnimationFrame(animate);
@@ -849,9 +890,9 @@
                     let prize = gachaItems[winningIndex];
                     if (prize.points > 0) {
                         currentUser.credit += prize.points;
-                        window.updateUserCreditInStorage().then(() => window.updateNavbarAuth());
+                        updateUserCreditInStorage().then(() => updateNavbarAuth());
                     }
-                    window.showToast(`ยินดีด้วย! คุณได้รับ "${prize.label}"`, 'success');
+                    showToast(`ยินดีด้วย! คุณได้รับ "${prize.label}"`, 'success');
 
                     let historyBox = document.getElementById('gacha-history');
                     if (historyBox.querySelector('p')) historyBox.innerHTML = '';
@@ -864,25 +905,25 @@
                 }
             }
             requestAnimationFrame(animate);
-        };
+        }
 
-        window.updateUserCreditInStorage = async function() {
+        async function updateUserCreditInStorage() {
             let u = users.find(x => x.username === currentUser.username);
             if (u) u.credit = currentUser.credit;
-            await window.saveCloudData();
+            await saveCloudData();
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        };
+        }
 
         // BACCARAT GAME
-        window.playBaccarat = async function(betOn) {
-            if (!currentUser) return window.openAuthModal('login');
+        async function playBaccarat(betOn) {
+            if (!currentUser) return openAuthModal('login');
             let bet = parseInt(document.getElementById('bac-bet-amount').value) || 0;
-            if (bet <= 0) return window.showToast('กรุณาระบุยอดเดิมพัน', 'warning');
-            if (currentUser.credit < bet) return window.showToast('Points ไม่พอเดิมพัน', 'warning');
+            if (bet <= 0) return showToast('กรุณาระบุยอดเดิมพัน', 'warning');
+            if (currentUser.credit < bet) return showToast('Points ไม่พอเดิมพัน', 'warning');
 
             currentUser.credit -= bet;
-            await window.updateUserCreditInStorage();
-            window.updateNavbarAuth();
+            await updateUserCreditInStorage();
+            updateNavbarAuth();
 
             let pScore = Math.floor(Math.random() * 10);
             let bScore = Math.floor(Math.random() * 10);
@@ -896,24 +937,24 @@
             if (betOn === res) {
                 let win = res === 'tie' ? bet * 9 : (res === 'player' ? bet * 2 : Math.floor(bet * 1.95));
                 currentUser.credit += win;
-                await window.updateUserCreditInStorage();
-                window.updateNavbarAuth();
-                window.showToast(`ชนะเดิมพัน! ได้รับ ${win} Points`, 'success');
+                await updateUserCreditInStorage();
+                updateNavbarAuth();
+                showToast(`ชนะเดิมพัน! ได้รับ ${win} Points`, 'success');
             } else {
-                window.showToast(`เสียใจด้วย ผลออก ${res.toUpperCase()}`, 'warning');
+                showToast(`เสียใจด้วย ผลออก ${res.toUpperCase()}`, 'warning');
             }
-        };
+        }
 
         // ADMIN FUNCTIONS
-        window.saveGachaPrice = async function() {
+        async function saveGachaPrice() {
             gachaPrice = parseInt(document.getElementById('setting-gacha-price').value) || 50;
-            await window.saveCloudData();
+            await saveCloudData();
             document.getElementById('gacha-cost-display').innerText = gachaPrice;
             document.getElementById('btn-gacha-price').innerText = gachaPrice;
-            window.showToast('บันทึกราคาหมุนกาชาเรียบร้อย', 'success');
-        };
+            showToast('บันทึกราคาหมุนกาชาเรียบร้อย', 'success');
+        }
 
-        window.renderAdminGachaList = function() {
+        function renderAdminGachaList() {
             let list = document.getElementById('admin-gacha-list');
             if(!list) return;
             list.innerHTML = '';
@@ -928,10 +969,10 @@
                     </tr>
                 `;
             });
-            window.drawWheel();
-        };
+            drawWheel();
+        }
 
-        window.handleAddGachaItem = async function(e) {
+        async function handleAddGachaItem(e) {
             e.preventDefault();
             gachaItems.push({
                 id: Date.now(),
@@ -940,20 +981,20 @@
                 rate: parseInt(document.getElementById('gacha-rate-input').value),
                 color: document.getElementById('gacha-color-input').value
             });
-            await window.saveCloudData();
-            window.renderAdminGachaList();
+            await saveCloudData();
+            renderAdminGachaList();
             e.target.reset();
-            window.showToast('เพิ่มรายการกาชาสำเร็จ', 'success');
-        };
+            showToast('เพิ่มรายการกาชาสำเร็จ', 'success');
+        }
 
-        window.deleteGacha = async function(id) {
+        async function deleteGacha(id) {
             gachaItems = gachaItems.filter(x => x.id !== id);
-            await window.saveCloudData();
-            window.renderAdminGachaList();
-            window.showToast('ลบรายการสำเร็จ', 'info');
-        };
+            await saveCloudData();
+            renderAdminGachaList();
+            showToast('ลบรายการสำเร็จ', 'info');
+        }
 
-        window.renderAdminUsersList = function() {
+        function renderAdminUsersList() {
             let list = document.getElementById('admin-users-list');
             if(!list) return;
             list.innerHTML = '';
@@ -972,60 +1013,60 @@
                     </tr>
                 `;
             });
-        };
+        }
 
-        window.adminTopUp = async function(uname) {
+        async function adminTopUp(uname) {
             let amount = parseInt(prompt(`ระบุจำนวน Points ที่ต้องการเติมให้ ${uname}:`));
             if (!isNaN(amount) && amount > 0) {
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.credit += amount;
-                    await window.saveCloudData();
-                    window.showToast(`เติมเครดิตให้ ${uname} สำเร็จ (+${amount} P)`, 'success');
-                    window.renderAdminUsersList();
+                    await saveCloudData();
+                    showToast(`เติมเครดิตให้ ${uname} สำเร็จ (+${amount} P)`, 'success');
+                    renderAdminUsersList();
                 }
             }
-        };
+        }
 
-        window.adminDeduct = async function(uname) {
+        async function adminDeduct(uname) {
             let amount = parseInt(prompt(`ระบุจำนวน Points ที่ต้องการหักออกจาก ${uname}:`));
             if (!isNaN(amount) && amount > 0) {
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.credit = Math.max(0, u.credit - amount);
-                    await window.saveCloudData();
-                    window.showToast(`หักเครดิตจาก ${uname} สำเร็จ (-${amount} P)`, 'warning');
-                    window.renderAdminUsersList();
+                    await saveCloudData();
+                    showToast(`หักเครดิตจาก ${uname} สำเร็จ (-${amount} P)`, 'warning');
+                    renderAdminUsersList();
                 }
             }
-        };
+        }
 
-        window.adminResetPass = async function(uname) {
+        async function adminResetPass(uname) {
             let newP = prompt(`ตั้งรหัสผ่านใหม่สำหรับ ${uname}:`);
             if (newP) {
                 let u = users.find(x => x.username === uname);
                 if (u) {
                     u.pass = newP;
-                    await window.saveCloudData();
-                    window.showToast(`เปลี่ยนรหัสผ่านของ ${uname} สำเร็จ`, 'success');
-                    window.renderAdminUsersList();
+                    await saveCloudData();
+                    showToast(`เปลี่ยนรหัสผ่านของ ${uname} สำเร็จ`, 'success');
+                    renderAdminUsersList();
                 }
             }
-        };
+        }
 
-        window.adminDeleteUser = async function(uname) {
+        async function adminDeleteUser(uname) {
             if (uname === 'admin') {
-                return window.showToast('ไม่สามารถลบบัญชีผู้ดูแลระบบ (Admin) หลักได้', 'warning');
+                return showToast('ไม่สามารถลบบัญชีผู้ดูแลระบบ (Admin) หลักได้', 'warning');
             }
             if (confirm(`คุณต้องการลบบัญชีผู้ใช้ "${uname}" ใช่หรือไม่?`)) {
                 users = users.filter(x => x.username !== uname);
-                await window.saveCloudData();
-                window.showToast(`ลบบัญชี ${uname} เรียบร้อยแล้ว`, 'success');
-                window.renderAdminUsersList();
+                await saveCloudData();
+                showToast(`ลบบัญชี ${uname} เรียบร้อยแล้ว`, 'success');
+                renderAdminUsersList();
             }
-        };
+        }
 
-        window.renderAdminMusicList = function() {
+        function renderAdminMusicList() {
             let list = document.getElementById('admin-music-list');
             if(!list) return;
             list.innerHTML = '';
@@ -1038,29 +1079,29 @@
                     </tr>
                 `;
             });
-        };
+        }
 
-        window.handleAddMusic = async function(e) {
+        async function handleAddMusic(e) {
             e.preventDefault();
             const title = document.getElementById('music-title-input').value.trim();
             const url = document.getElementById('music-url-input').value.trim();
             if(title && url) {
                 playlist.push({ id: Date.now(), title, url });
-                await window.saveCloudData();
-                window.renderAdminMusicList();
+                await saveCloudData();
+                renderAdminMusicList();
                 e.target.reset();
-                window.showToast('เพิ่มเพลงใหม่สำเร็จ', 'success');
+                showToast('เพิ่มเพลงใหม่สำเร็จ', 'success');
             }
-        };
+        }
 
-        window.deleteMusic = async function(id) {
+        async function deleteMusic(id) {
             playlist = playlist.filter(x => x.id !== id);
-            await window.saveCloudData();
-            window.renderAdminMusicList();
-            window.showToast('ลบเพลงสำเร็จ', 'info');
-        };
+            await saveCloudData();
+            renderAdminMusicList();
+            showToast('ลบเพลงสำเร็จ', 'info');
+        }
 
-        window.handleSaveWebSettings = async function(e) {
+        async function handleSaveWebSettings(e) {
             e.preventDefault();
             webSettings = {
                 name: document.getElementById('setting-brand-name').value,
@@ -1069,12 +1110,12 @@
                 bannerImg: document.getElementById('setting-banner-img').value,
                 bannerTitle: 'วงล้อกาชาปอง UR & มินิเกมบาคาร่าสุดมันส์'
             };
-            await window.saveCloudData();
-            window.applyWebSettings();
-            window.showToast('บันทึกการตั้งค่าเว็บเรียบร้อย', 'success');
-        };
+            await saveCloudData();
+            applyWebSettings();
+            showToast('บันทึกการตั้งค่าเว็บเรียบร้อย', 'success');
+        }
 
-        window.showToast = function(msg, type = 'info') {
+        function showToast(msg, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const colors = { success: 'bg-emerald-500 text-slate-950 font-bold', warning: 'bg-amber-500 text-slate-950 font-bold', info: 'bg-purple-600 text-white font-bold' };
@@ -1082,7 +1123,7 @@
             toast.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3500);
-        };
+        }
     </script>
 </body>
 </html>
